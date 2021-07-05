@@ -15,6 +15,14 @@ const getFile = (url) => {
     });
   });
 }
+app.post('/api/user/myOrders', jsonParser, async(req, res)=>{
+  data = await getFile('./mock/my_orders.json');
+  res.json(JSON.parse(data))
+})
+app.post('/api/order/detail', jsonParser, async(req, res)=>{
+  data = await getFile('./mock/order_detail.json');
+  res.json(JSON.parse(data))
+})
 app.post('/login', jsonParser, async (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
