@@ -1,9 +1,11 @@
 const express = require('express');
 const fs = require('fs');
 const bodyParser = require('body-parser')
+const { MongoClient } = require('mongodb')
 const app = express();
 const jsonParser = bodyParser.json()
-
+const url = 'mongodb://localhost:27017'
+const client = new MongoClient(url);
 const getFile = (url) => {
   return new Promise((resolve, reject) => {
     fs.readFile(url, 'utf-8', (err, data) => {
@@ -147,6 +149,24 @@ app.post('/api/order/create',jsonParser, async(req, res)=>{
     msg: 'order created successfully',
     order_id: 123
   })
+})
+app.post('/login-db', jsonParser, async (req, res) => {
+  const username = req.body.username;
+  const password = req.body.password;
+  await client.connect()
+  const db = client.db('express')
+  const collection = db.collection('users');
+  const matchRes = await collection.find({"username": username}).toArray()
+  if(matchRes.length == 0){
+    data = await getFile('./mock/login_fail.json');
+  }else{
+    if(matchRes[0].password !== password){
+      data = await getFile('./mock/login_fail.json');
+    }else{
+      data = await getFile('./mock/login.json');
+    }
+  }
+  res.json(JSON.parse(data))
 })
 app.post('/login', jsonParser, async (req, res) => {
   const username = req.body.username;
